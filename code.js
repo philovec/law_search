@@ -10,10 +10,13 @@ const result = document.getElementById('result')
 const template = document.getElementById('template')
 const templateHistory = document.getElementById('template-history')
 const history = document.getElementById('history')
+const historyBtn = document.getElementById('history-reset')
 
 document.addEventListener('DOMContentLoaded',()=>{
     load()
-    
+
+    historyBtn.addEventListener('click', historyReset)
+
     history.addEventListener('click', e => {
         if(e.target && (e.target.classList.contains('meta') || e.target.classList.contains('content'))){
             const id = e.target.parentElement.getAttribute('data-id')
@@ -141,6 +144,53 @@ function searchFromHistory(id){
 
 }
 
+function historyReset(){
+    const conf = confirm('履歴を消去しますか？')
+    if(!conf){return}
+    localStorage.clear()
+    alert('履歴を消去しました。')
+    load()
+}
+
+function saveCache(resultData){
+    const maxHistoryNum = 4    //履歴数の最大値
+    const before = JSON.parse(localStorage.getItem('law_data'))
+
+    const newData = []
+    //すでに履歴があればそれを一旦排除
+    if(before){
+        const beforeData = before.data 
+        for (i = 0; i < beforeData.length; i++){
+            const pushNeed = resultData.data.every(val =>{
+                const id = val.id
+                if (beforeData[i].id == id){
+                    return false
+                }
+                return true
+            })
+            if(pushNeed){newData.push(beforeData[i])}
+        }
+    }
+
+    //今回分を追加
+    resultData.data.forEach(val => {
+        newData.push(val)
+     })
+
+    //履歴数の上限チェック
+    while (newData.length > maxHistoryNum){
+        newData.shift()
+    }
+
+    //保存
+    const dataForSave = JSON.stringify({
+        data:newData
+    })
+    localStorage.setItem('law_data',dataForSave)
+    alert('履歴に保存されました。')
+    load()
+}
+
 function resultDisplay(resultData){
     result.innerHTML = ''
     const keywords = resultData.keywords
@@ -206,11 +256,7 @@ function resultDisplay(resultData){
     });
 }
 
-// HTMLのheadでSupabase CDNを読み込んでいる前提
-// const supabase = supabase.createClient(URL, KEY);
-
 async function postServer(request){
-    // Supabaseの管理画面で確認できるURLとANON_KEY
     const SUPABASE_URL = 'https://ditxmrgfntsndjsmaagg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_XV855Fm-T69rS-8WAUWVTw_96ZJI6A7';
 
@@ -259,51 +305,6 @@ async function postServer(request){
             keywords: request.keywords 
         };
     }
-}
-
-function saveCache(resultData){
-    const maxHistoryNum = 4    //履歴数の最大値
-    const before = JSON.parse(localStorage.getItem('law_data'))
-
-    const newData = []
-    //すでに履歴があればそれを一旦排除
-    if(before){
-        const beforeData = before.data 
-        for (i = 0; i < beforeData.length; i++){
-            const pushNeed = resultData.data.every(val =>{
-                const id = val.id
-                if (beforeData[i].id == id){
-                    return false
-                }
-                return true
-            })
-            if(pushNeed){newData.push(beforeData[i])}
-        }
-    }
-
-    //今回分を追加
-    resultData.data.forEach(val => {
-        newData.push(val)
-     })
-
-    //履歴数の上限チェック
-    while (newData.length > maxHistoryNum){
-        newData.shift()
-    }
-
-    //保存
-    const dataForSave = JSON.stringify({
-        data:newData
-    })
-    localStorage.setItem('law_data',dataForSave)
-    alert('履歴に保存されました。')
-    load()
-}
-
-function mistakeDisplay(mistakeList){
-    const errStr = mistakeList.join('¥n')
-    errorDiv.textContent = errStr
-    errorDiv.classList.remove('hidden')
 }
 
 function errorDisplay(errorMsg){
