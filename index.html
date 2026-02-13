@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container">
@@ -23,11 +24,11 @@
         <div class="search-form">
         <label class="form-group">
             <span class="label-text">法令名</span>
-            <select id="law-list"><option selected>民法</option></select>
+            <select id="law-list"></select>
         </label>
 
         <div class="article-inputs">
-            <input type="number" min="1" placeholder="条番号" id="article" area-label="条番号">
+            <input type="text" min="1" placeholder="条番号(例：110,899_2)" id="article" area-label="条番号">
             <input type="number" min="1" placeholder="項番号" id="paragraph" area-label="項番号">
             <input type="number" min="1" placeholder="号番号" id="item" area-label="号番号">
         </div>
@@ -35,7 +36,6 @@
         <input type="text" placeholder="キーワード(複数指定は空白区切り)" id="keywords" area-label="キーワード">
 
         <div id="error" class="hidden"></div>
-        
         <button id="search-btn">検索</button>
 
         <div id="result">

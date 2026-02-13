@@ -13,39 +13,12 @@ const history = document.getElementById('history')
 
 document.addEventListener('DOMContentLoaded',()=>{
     load()
-
-    //サンプルデータ
-const a = {
-  "status": "success",
-  "keywords": ["の","は"],
-  "data": [
-    {
-          "last_modified": "2026-02-13",
-      "id": 100,
-      "law_name": "民法",
-      "article": 709,
-      "paragraph": null,
-      "item": null,
-      "text": "故意又は過失によって他人の権利又は法律上保護される利益を侵害した者は、これによって生じた損害を賠償する責任を負う。"
-    },
-    {
-          "last_modified": "2026-02-13",
-      "id": 20,
-      "law_name": "民法",
-      "article": 709,
-      "paragraph": 5,
-      "item": 4,
-      "text": "故意又は過失によって他人の権利又は法律上保護される利益を侵害した者は、これによって生じた損害を賠償する責任を負う。"
-    }
-  ]
-}
     
     history.addEventListener('click', e => {
         if(e.target && (e.target.classList.contains('meta') || e.target.classList.contains('content'))){
             const id = e.target.parentElement.getAttribute('data-id')
             searchFromHistory(id)
         }
-
     })
     
     searchBtn.addEventListener('click', searchFromInput)
@@ -60,6 +33,10 @@ const a = {
 
 async function load(){
     try{
+        //初期化
+        lawNameSelect.innerHTML = ''
+        history.innerHTML = '<summary>履歴</summary>'
+
         //法令名の表示
         const resultData = await postServer({action:'load'})
         const lawNameList = resultData.law_name_list
@@ -119,19 +96,12 @@ async function load(){
 async function searchFromInput(){
     try{
         errorDiv.classList.add('hidden')
-        const mistakeList = []
 
         const lawNameStr = lawNameSelect.value
         const articleNum = articleInput.value
         const paragraphNum = paragraphInput.value
         const itemNum = itemInput.value
         let keywordsStr = keywordsInput.value
-        
-        if(!articleNum){
-            mistakeList.push('条番号は必須です。')
-            mistakeDisplay(mistakeList)
-            return
-        }
 
         // keywordsを配列に変換
         const rawKeywords = keywordsStr.split(/[\s,、　]+/);
@@ -228,8 +198,8 @@ function resultDisplay(resultData){
                 .sort((a, b) => b.length - a.length)
                 .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             const regex = new RegExp(`(${escapedKeywords.join('|')})`, 'gi');
-            const markedText = text.replace(regex, `<mark>$1</mark>`)
-            pText.innerHTML = escapeHTML(markedText)
+            const markedText = escapeHTML(text).replace(regex, `<mark>$1</mark>`)
+            pText.innerHTML = markedText
         }
 
         result.appendChild(newDiv)
@@ -251,17 +221,13 @@ async function postServer(request){
 
     // A. 法令名リストの取得 (load時)
     if(action === 'load'){
-        // distinctな法令名を取得するのは少し工夫が必要ですが、
-        // ここでは単純に law_names テーブルがあるか、RPCを使う想定
-        // または laws テーブルから取得してJSでSetにする
         const { data, error } = await supabase
-            .from('laws')
-            .select('law_name');
-            
+            .rpc('get_law_names'); 
+
         if(error) throw error.message;
 
-        // 重複排除してリスト化
-        const names = [...new Set(data.map(d => d.law_name))];
+        // dataは [{law_name: "会社法"}, {law_name: "民法"}...] の形式で返ってきます
+        const names = data.map(d => d.law_name);
         return { law_name_list: names };
     }
 
@@ -331,6 +297,7 @@ function saveCache(resultData){
     })
     localStorage.setItem('law_data',dataForSave)
     alert('履歴に保存されました。')
+    load()
 }
 
 function mistakeDisplay(mistakeList){
