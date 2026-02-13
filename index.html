@@ -1,30 +1,53 @@
 <!DOCTYPE html>
 <head>
     <title>法令検索</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>法令検索</h1>
+    <div class="container">
+        <h1>法令検索</h1>
 
-    <details id="history">
-        <summary>履歴</summary>
-    </details>
+        <details id="history">
+            <summary>履歴</summary>
+        </details>
+        <template id="template-history">
+            <div>
+                <span class="meta"></span>
+                <span class="content"></span>
+            </div>
+        </template>
 
-    <label>
-        法令名
-        <select id="law-list"><option selected>民法</option></select>
-    </label>
+        <div class="search-form">
+        <label class="form-group">
+            <span class="label-text">法令名</span>
+            <select id="law-list"><option selected>民法</option></select>
+        </label>
 
-    <input type="number" min="1" placeholder="条番号" id="article">
-    <input type="number" min="1" placeholder="項番号" id="paragraph">
-    <input type="number" min="1" placeholder="号番号" id="item">
+        <div class="article-inputs">
+            <input type="number" min="1" placeholder="条番号" id="article" area-label="条番号">
+            <input type="number" min="1" placeholder="項番号" id="paragraph" area-label="項番号">
+            <input type="number" min="1" placeholder="号番号" id="item" area-label="号番号">
+        </div>
 
-    <input type="text" placeholder="キーワード(複数指定は空白区切り)" id="keywords">
+        <input type="text" placeholder="キーワード(複数指定は空白区切り)" id="keywords" area-label="キーワード">
 
-    <div id="error"></div>
-    <button id="search-btn">検索</button>
+        <div id="error" class="hidden"></div>
+        
+        <button id="search-btn">検索</button>
 
-    <section id="result">ここに検索結果が表示されます。</section>
-
+        <div id="result">
+            ここに検索結果が表示されます。
+        </div>
+        <template id="template">
+            <div>
+                <p class="meta"></p>
+                <button class="save">保存</button>
+                <p class="text"></p>
+            </div>
+        </template>
+    </div>
     <script src="code.js"></script>
 </body>

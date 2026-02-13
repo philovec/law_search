@@ -1,3 +1,251 @@
+@charset "UTF-8";
+
+/* =========================================
+   変数定義 (カラーパレットなど)
+   ========================================= */
+:root {
+    --primary-color: #0056b3; /* 落ち着いた青 */
+    --primary-hover: #004494;
+    --text-color: #333;       /* 真っ黒すぎないグレー */
+    --bg-color: #f4f7f6;      /* ほんのりグレーの背景 */
+    --card-bg: #ffffff;       /* カードの背景は白 */
+    --border-color: #ddd;
+    --error-color: #d9534f;
+    --spacing-unit: 16px;
+}
+
+/* =========================================
+   基本設定 (リセットとタイポグラフィ)
+   ========================================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: var(--spacing-unit);
+}
+
+/* JSで制御するためのユーティリティクラス */
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+/* =========================================
+   レイアウト
+   ========================================= */
+/* 追加したコンテナ: 画面幅を制限し中央寄せ */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--card-bg);
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+/* =========================================
+   履歴エリア (details)
+   ========================================= */
+#history {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: var(--spacing-unit);
+    background-color: #fafafa;
+}
+
+#history summary {
+    padding: var(--spacing-unit);
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+/* 履歴アイテム（JSで生成される要素） */
+#history > div {
+    padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
+    border-top: 1px dotted var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#history > div:hover {
+    background-color: #eef;
+}
+
+#history .meta {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+#history .content {
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   検索フォーム周り
+   ========================================= */
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
+}
+
+/* 入力欄とラベルの共通設定 */
+input, select, button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* ラベル付きのグループ */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.label-text {
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+/* 条項号の入力欄を横並びにする */
+.article-inputs {
+    display: flex;
+    gap: 10px;
+}
+.article-inputs input {
+    flex: 1; /* 3つの幅を均等にする */
+    min-width: 0; /* Flexアイテムの縮小を許可 */
+}
+
+/* キーワード入力欄 */
+#keywords {
+    width: 100%;
+}
+
+/* 検索ボタン */
+#search-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    padding: 12px;
+}
+#search-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+/* =========================================
+   メッセージ・エラー表示
+   ========================================= */
+#error {
+    color: var(--error-color);
+    background-color: #fdd;
+    padding: var(--spacing-unit);
+    border: 1px solid var(--error-color);
+    border-radius: 4px;
+    margin-bottom: var(--spacing-unit);
+    white-space: pre-wrap; /* 改行(¥n)を反映させる */
+}
+
+/* =========================================
+   検索結果エリア
+   ========================================= */
+#result {
+    margin-top: calc(var(--spacing-unit) * 2);
+}
+
+/* 検索件数表示 */
+#result > p:first-child {
+    font-weight: bold;
+    margin-bottom: var(--spacing-unit);
+}
+
+/* 結果カード（JSで生成される要素） */
+#result > div {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
+    border-radius: 4px;
+    position: relative; /* 保存ボタンの配置基準 */
+}
+
+/* 結果のメタ情報 */
+#result .meta {
+    margin-top: 0;
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    justify-content: space-between; /* 日付を右寄せ */
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-right: 70px; /* 保存ボタンとかぶらないように */
+}
+
+#result .meta span:last-child {
+    font-size: 0.8rem;
+}
+
+/* 保存ボタン */
+#result .save {
+    position: absolute;
+    top: var(--spacing-unit);
+    right: var(--spacing-unit);
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    background-color: #eee;
+    color: #333;
+    cursor: pointer;
+}
+#result .save:hover {
+    background-color: #ddd;
+}
+
+/* 条文本文 */
+#result .text {
+    margin-bottom: 0;
+    line-height: 1.8;
+    word-break: break-all; /* 長い文字列でレイアウト崩れを防ぐ */
+}
+
+/* ハイライト */
+mark {
+    background-color: #fff3cd;
+    font-weight: bold;
+    padding: 2px 0;
+}
+
+/* =========================================
+   モバイル対応 (メディアクエリ)
+   ========================================= */
+@media (max-width: 600px) {
+    .container {
+        padding: var(--spacing-unit);
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    /* スマホでは条項号を縦積みにする */
+    .article-inputs {
+        flex-direction: column;
+    }
 }
