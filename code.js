@@ -61,7 +61,7 @@ const a = {
 async function load(){
     try{
         //法令名の表示
-        const resultData = {law_name_list:['民法','刑法','会社法']}//await postServer({action:'load'})
+        const resultData = await postServer({action:'load'})
         const lawNameList = resultData.law_name_list
 
         lawNameList.forEach(law_name=>{
@@ -236,8 +236,63 @@ function resultDisplay(resultData){
     });
 }
 
-function postServer(request){
+// HTMLのheadでSupabase CDNを読み込んでいる前提
+// const supabase = supabase.createClient(URL, KEY);
 
+async function postServer(request){
+    // Supabaseの管理画面で確認できるURLとANON_KEY
+    const SUPABASE_URL = 'https://ditxmrgfntsndjsmaagg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_XV855Fm-T69rS-8WAUWVTw_96ZJI6A7';
+
+    // クライアントの作成
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const { action } = request;
+
+    // A. 法令名リストの取得 (load時)
+    if(action === 'load'){
+        // distinctな法令名を取得するのは少し工夫が必要ですが、
+        // ここでは単純に law_names テーブルがあるか、RPCを使う想定
+        // または laws テーブルから取得してJSでSetにする
+        const { data, error } = await supabase
+            .from('laws')
+            .select('law_name');
+            
+        if(error) throw error.message;
+
+        // 重複排除してリスト化
+        const names = [...new Set(data.map(d => d.law_name))];
+        return { law_name_list: names };
+    }
+
+    // B. 検索 (search-from-input時)
+    if(action === 'search-from-input'){
+        let query = supabase.from('laws').select('*');
+
+        // 条件付与
+        if(request.law_name) query = query.eq('law_name', request.law_name);
+        if(request.article) query = query.eq('article', request.article);
+        if(request.paragraph) query = query.eq('paragraph', request.paragraph);
+        if(request.item) query = query.eq('item', request.item);
+
+        // 全文検索
+        if(request.keywords && request.keywords.length > 0){
+            request.keywords.forEach(word => {
+                // 全キーワードが含まれるようにAND条件でつなぐ
+                query = query.ilike('text', `%${word}%`);
+            });
+        }
+
+        const { data, error } = await query;
+        if(error) throw error.message;
+
+        // 呼び出し元の期待する形式で返す
+        return { 
+            status: 'success', 
+            data: data,
+            keywords: request.keywords 
+        };
+    }
 }
 
 function saveCache(resultData){
