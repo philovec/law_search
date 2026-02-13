@@ -1,12 +1,30 @@
 <!DOCTYPE html>
 <head>
     <title>法令検索</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>法令検索</h1>
+
+    <details id="history">
+        <summary>履歴</summary>
+    </details>
+
     <label>
         法令名
-        <select></select>
+        <select id="law-list"><option selected>民法</option></select>
     </label>
-    
+
+    <input type="number" min="1" placeholder="条番号" id="article">
+    <input type="number" min="1" placeholder="項番号" id="paragraph">
+    <input type="number" min="1" placeholder="号番号" id="item">
+
+    <input type="text" placeholder="キーワード(複数指定は空白区切り)" id="keywords">
+
+    <div id="error"></div>
+    <button id="search-btn">検索</button>
+
+    <section id="result">ここに検索結果が表示されます。</section>
+
+    <script src="code.js"></script>
 </body>
