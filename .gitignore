@@ -1,0 +1,5 @@
+log/*
+venv/*
+pycache/*
+setup.sql
+import.py
